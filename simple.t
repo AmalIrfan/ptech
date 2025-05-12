@@ -1,0 +1,172 @@
+/* This is an example program that uses ptech
+   It reads op and writes opcode */
+
+\defs\sops
+    RET\and
+    PHA\and
+    PLA\end
+\defs\dops
+    JSR\and
+    BEQ\and
+    ADC\and
+    SBC\end
+\defs\rops
+    JSR\end
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+enum op {\
+\foreach\op\in\sops
+    OP_\op,\end
+\foreach\op\in\dops
+    OP_\op,\end
+\foreach\op\in\rops
+    OP_R\op,\end
+};
+
+int rop[] = {
+    [OP_JSR] = OP_RJSR,
+};
+
+struct input {
+    union {
+        const char *str;
+        FILE *fh; 
+    } input;
+    enum {
+        STRING,
+        FILE_,
+    } type;
+};
+
+int assemble(struct input input);
+
+int main()
+{
+    struct input input = {
+        .input = {.fh = stdin},
+        .type = FILE_,
+    };
+    int opcode = assemble(input);
+    fputs((void*)&opcode, stdout);
+}
+
+union token {
+    char str[10];
+    int value;
+};
+
+union token gettok(struct input *input);
+
+int makeupper(char *str);
+int makenumber(const char *str);
+int makehexa(const char *str);
+
+int assemble(struct input input) {
+    union token op = gettok(&input);
+    union token arg = {0};
+
+    int opcode = 0;
+
+    makeupper(op.str);
+
+   \
+    \foreach\op\in\sops \
+    if (strcmp(op.str, \s\op) == 0)
+        opcode = OP_\op;
+    else\end\
+    \foreach\op\in\dops \
+    if (strcmp(op.str, \s\op) == 0) {
+        opcode = OP_\op;
+    } else\end
+        return -1;
+
+    switch (opcode) {\
+    \foreach\op\in\dops
+    case OP_\op:\end
+        arg = gettok(&input);
+        if (arg.str[0] == '$') {
+            opcode = rop[opcode];
+        }
+        if (arg.str[0] == '#' || arg.str[0] == '$' && arg.str[1] == '#')
+            arg.value = makehexa(arg.str);
+        else
+            arg.value = makenumber(arg.str);
+        opcode |= arg.value << 8;
+        break;
+    }
+
+    return opcode;
+}
+
+#105 "simple.t"
+
+union token gettok(struct input *in)
+{
+    char ch = 0;
+    union token token;
+    int i = 0;
+    do {
+        if (in->type == STRING)
+            ch = *in->input.str++;
+        else if (in->type == FILE_)
+            ch = getc(in->input.fh);
+        else
+            break;
+        if (!isspace(ch))
+            break;
+    } while(ch);
+
+    while(ch) {
+        token.str[i++] = ch;
+        if (in->type == STRING)
+            ch = *in->input.str++;
+        else if (in->type == FILE_)
+            ch = getc(in->input.fh);
+        else
+            break;
+        if (isspace(ch))
+            break;
+    };
+    token.str[i++] = 0;
+    return token;
+}
+
+int makeupper(char *str) {
+    char ch = *str;
+    while (ch) {
+    	if (isalpha(ch))
+	    *str = ch & 95;
+	ch = *++str;
+    }
+    return 0;
+}
+
+int makenumber(const char *str) {
+    int n = 0;
+    char ch = *str;
+    if (ch == '$')
+        ch = *++str;
+    do {
+        n = n * 10 + ch - '0';
+        ch = *++str;
+    } while(ch);
+    return n;
+}
+
+int makehexa(const char *str) {
+    int n = 0;
+    char ch = *++str;
+    if (ch == '#')
+        ch = *++str;
+    do {
+        if (ch < '9')
+            n = n * 16 + ch - '0';
+        else
+            n = n * 16 + 10 + ch - 'A';
+        ch = *++str;
+    } while(ch);
+    return n;
+}
