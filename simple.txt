@@ -101,7 +101,7 @@ int assemble(struct input input) {
     return opcode;
 }
 
-#105 "simple.t"
+#105 "simple.txt"
 
 union token gettok(struct input *in)
 {

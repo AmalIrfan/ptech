@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     /* build the builder (this program) */
     if( build(__FILE__, argv[0], builder) != SKIPPED ) return 1;
 
-    if( preprocess("simple.t", "simple.c", force) == FAILED ) return 1;
+    if( preprocess("simple.txt", "simple.c", force) == FAILED ) return 1;
     if( build("simple.c", "simple", force) == FAILED ) return 1;
 }
 

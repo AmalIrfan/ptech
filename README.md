@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     /* build the builder (this program) */
     if( build(__FILE__, argv[0], builder) != SKIPPED ) return 1;
 
-    if( preprocess("simple.t", "simple.c", force) == FAILED ) return 1;
+    if( preprocess("simple.txt", "simple.c", force) == FAILED ) return 1;
     if( build("simple.c", "simple", force) == FAILED ) return 1;
 }
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 $ cc -o build build.c
 $ ./build
 CC ./build <- build.c  skip.
-PP simple.c <- simple.t  ok.
+PP simple.c <- simple.txt  ok.
 CC simple <- simple.c  ok.
 $ ./simple | xxd
 JSR 10
