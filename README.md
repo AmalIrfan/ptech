@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
 ```
 
-```cmd
+```console
 $ cc -o build build.c
 $ ./build
 CC ./build <- build.c  skip.
