@@ -33,7 +33,7 @@ If build.c is changed:
 
 ## Example
 
-[build.c](./build.c)
+[build.c](./build.c) builds [simple.txt](./simple.txt)
 
 ```c
 #define PTECH_IMPLEMENTATION
