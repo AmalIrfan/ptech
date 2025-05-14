@@ -27,9 +27,9 @@ preprocess(const char* input, const char* output, int force);
 /* pt_string decs */
 
 struct pt_string {
-	int size;
-	int capacity;
-	char *data;
+    int size;
+    int capacity;
+    char *data;
 };
 
 struct pt_string pt_string_create(void* buf, int capacity);
@@ -43,26 +43,26 @@ int pt_string_exec(struct pt_string* s);
 /* pt_string defs */
 
 struct pt_string pt_string_create(void* buf, int capacity) {
-	struct pt_string s = {0, capacity, buf};
-	if (!buf)
-		/* TODO: allocate */;
+    struct pt_string s = {0, capacity, buf};
+    if (!buf)
+        /* TODO: allocate */;
         /* null terminator */
         s.data[0] = 0;
-	return s;
+    return s;
 }
 
 void pt_string_append_one(struct pt_string* s, const char* cs) {
-	char ch = *cs;
-	while (ch) {
-		s->data[s->size] = ch;
-		cs++;
-		s->size++;
-		ch = *cs;
-                /* have room for null terminator? */
-		if (s->size >= s->capacity - 1 && ch)
-			/* TODO: inform */
-			break;
-	}
+    char ch = *cs;
+    while (ch) {
+        s->data[s->size] = ch;
+        cs++;
+        s->size++;
+        ch = *cs;
+        /* have room for null terminator? */
+        if (s->size >= s->capacity - 1 && ch)
+            /* TODO: inform */
+            break;
+    }
         s->data[s->size] = 0;
 }
 
