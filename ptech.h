@@ -17,6 +17,7 @@ preprocess(const char* input, const char* output, int force);
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <string.h>
@@ -348,7 +349,8 @@ preprocess(const char* input, const char* output, int force) {
         fprintf(stderr, "Error: input: %s: %s\n", input, strerror(e));
         return FAILED;
     }
-    FILE* outfh = fopen(output, "w");
+    // use temporary file for output, rename it to output on success
+    FILE* outfh = fopen("preprocess.tmp", "w");
     if (!outfh) {
         int e = errno;
         puts("  no.");
@@ -390,6 +392,7 @@ preprocess(const char* input, const char* output, int force) {
                 puts("  no.");
                 fclose(infh);
                 fclose(outfh);
+                unlink("preprocess.tmp");
                 return FAILED;
             }
             else if(pt_capture(tok, infh) == 0)
@@ -405,6 +408,7 @@ preprocess(const char* input, const char* output, int force) {
                 if (pt_foreach(infh)) {
                     fclose(infh);
                     fclose(outfh);
+                    unlink("preprocess.tmp");
                     return FAILED;
                 }
             }
@@ -419,6 +423,7 @@ preprocess(const char* input, const char* output, int force) {
     puts("  ok.");
     fclose(infh);
     fclose(outfh);
+    rename("preprocess.tmp", output);
     return SUCCESS;
 }
 
