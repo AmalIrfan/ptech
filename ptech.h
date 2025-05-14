@@ -388,6 +388,8 @@ preprocess(const char* input, const char* output, int force) {
             tok = pt_getid(infh);
             if (!tok) {
                 puts("  no.");
+                fclose(infh);
+                fclose(outfh);
                 return FAILED;
             }
             else if(pt_capture(tok, infh) == 0)
@@ -399,8 +401,13 @@ preprocess(const char* input, const char* output, int force) {
                 pt_define(tok, infh);
             else if (pt_expand(tok) == 0)
                 (void)0;
-            else if (strcmp(tok, "foreach") == 0)
-                pt_foreach(infh);
+            else if (strcmp(tok, "foreach") == 0) {
+                if (pt_foreach(infh)) {
+                    fclose(infh);
+                    fclose(outfh);
+                    return FAILED;
+                }
+            }
             else {
                 pt_putc('\\', outfh);
                 fputs(tok, outfh);
@@ -488,6 +495,16 @@ int pt_expand(const char* name) {
     return 1;
 }
 
+int pt_blocks_find(const char* id) {
+    int bi = 0;
+    for (bi = 0; bi < pt_bx; bi++) {
+        if (strcmp(pt_blocks[bi].name, id) == 0) {
+            return bi;
+        }
+    }
+    return -1;
+}
+
 int pt_foreach(FILE* fh) {
     pt_context_push(pt_bx, 1, 0, 0);
     struct pt_context* ctx = pt_context_view();
@@ -513,6 +530,12 @@ int pt_foreach(FILE* fh) {
     }
     if (!id)
         return 1;
+    if (pt_blocks_find(id) < 0) {
+        puts(" no.");
+        fflush(stdout);
+        fprintf(stderr, "Error: foreach: Can't find: %s\n", id);
+        return 1;
+    }
     n = strlen(id) + 1;
     memcpy(name, id, n);
 
